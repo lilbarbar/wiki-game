@@ -95,8 +95,14 @@ let get_first_item_of_second_unordered_list contents : string =
 
 (* Gets all bolded text from an HTML page. *)
 let get_bolded_text contents : string list =
-  ignore (contents : string);
-  failwith "TODO"
+  let open Soup in
+  (* print_string contents; *)
+  let contents_parsed = parse contents in
+  let the_nodes = contents_parsed $$ "b" in
+  let nodes_as_a_list = to_list the_nodes in
+  (* *)
+  List.map nodes_as_a_list ~f:(fun li ->
+    texts li |> String.concat ~sep:"" |> String.strip)
 ;;
 
 (* [make_command ~summary ~f] is a helper function that builds a simple HTML parsing
