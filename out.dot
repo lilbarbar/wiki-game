@@ -1,0 +1,31 @@
+digraph G {
+  romeo [fillcolor="#0003E8", label="romeo", shape=box, ];
+  india [fillcolor="#0003E8", label="india", shape=box, ];
+  charlie [fillcolor="#0003E8", label="charlie", shape=box, ];
+  kilo [fillcolor="#0003E8", label="kilo", shape=box, ];
+  bravo [fillcolor="#0003E8", label="bravo", shape=box, ];
+  foxtrot [fillcolor="#0003E8", label="foxtrot", shape=box, ];
+  delta [fillcolor="#0003E8", label="delta", shape=box, ];
+  juliet [fillcolor="#0003E8", label="juliet", shape=box, ];
+  golf [fillcolor="#0003E8", label="golf", shape=box, ];
+  alpha [fillcolor="#0003E8", label="alpha", shape=box, ];
+  hotel [fillcolor="#0003E8", label="hotel", shape=box, ];
+  lima [fillcolor="#0003E8", label="lima", shape=box, ];
+  echo [fillcolor="#0003E8", label="echo", shape=box, ];
+  
+  
+  romeo -> juliet [dir=none, ];
+  india -> delta [dir=none, ];
+  india -> golf [dir=none, ];
+  india -> hotel [dir=none, ];
+  charlie -> bravo [dir=none, ];
+  kilo -> foxtrot [dir=none, ];
+  bravo -> alpha [dir=none, ];
+  foxtrot -> bravo [dir=none, ];
+  foxtrot -> echo [dir=none, ];
+  delta -> alpha [dir=none, ];
+  golf -> delta [dir=none, ];
+  hotel -> golf [dir=none, ];
+  lima -> foxtrot [dir=none, ];
+  
+  }
