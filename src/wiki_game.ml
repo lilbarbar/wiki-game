@@ -15,6 +15,7 @@ open! Core
    uniformity in article format. We can expect that all Wikipedia article links parsed
    from a Wikipedia page will have the form "/wiki/<TITLE>". *)
 let get_linked_articles contents : string list =
+  print_s [%message "here are the contents" (contents : string)];
   ignore (contents : string);
   failwith "TODO"
 ;;
@@ -47,8 +48,8 @@ let visualize_command =
   let open Command.Let_syntax in
   Command.basic
     ~summary:
-      "parse a file listing interstates and generate a graph visualizing the highway \
-       network"
+      "parse a file listing interstates and generate a graph visualizing \
+       the highway network"
     [%map_open
       let how_to_fetch = File_fetcher.How_to_fetch.param
       and origin = flag "origin" (required string) ~doc:" the starting page"
@@ -87,11 +88,14 @@ let find_path ?(max_depth = 3) ~origin ~destination ~how_to_fetch () =
 let find_path_command =
   let open Command.Let_syntax in
   Command.basic
-    ~summary:"Play wiki game by finding a link between the origin and destination pages"
+    ~summary:
+      "Play wiki game by finding a link between the origin and destination \
+       pages"
     [%map_open
       let how_to_fetch = File_fetcher.How_to_fetch.param
       and origin = flag "origin" (required string) ~doc:" the starting page"
-      and destination = flag "destination" (required string) ~doc:" the destination page"
+      and destination =
+        flag "destination" (required string) ~doc:" the destination page"
       and max_depth =
         flag
           "max-depth"
