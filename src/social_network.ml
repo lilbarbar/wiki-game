@@ -34,7 +34,9 @@ module Network = struct
              consider the connection between b and a. *)
           [ a, b; b, a ]
         | None ->
-          printf "ERROR: Could not parse line as connection; dropping. %s\n" s;
+          printf
+            "ERROR: Could not parse line as connection; dropping. %s\n"
+            s;
           [])
     in
     Connection.Set.of_list connections
@@ -91,8 +93,8 @@ let visualize_command =
   let open Command.Let_syntax in
   Command.basic
     ~summary:
-      "parse a file listing friendships and generate a graph visualizing the social \
-       network"
+      "parse a file listing friendships and generate a graph visualizing \
+       the social network"
     [%map_open
       let input_file =
         flag
@@ -112,17 +114,63 @@ let visualize_command =
           (* [G.add_edge] auomatically adds the endpoints as vertices in the graph if
              they don't already exist. *)
           G.add_edge graph person1 person2);
-        Dot.output_graph (Out_channel.create (File_path.to_string output_file)) graph;
+        Dot.output_graph
+          (Out_channel.create (File_path.to_string output_file))
+          graph;
         printf !"Done! Wrote dot file to %{File_path}\n%!" output_file]
 ;;
 
 (* [find_friend_group network ~person] returns a list of all people who are mutually
    connected to the provided [person] in the provided [network]. *)
-let find_friend_group network ~person : Person.t list =
-  ignore (network : Network.t);
-  ignore (person : Person.t);
-  failwith "TODO"
+
+(* module PersonSet = Hash_set.Make (Person) *)
+
+let find_friend_group (network : Network.t) ~person : Person.t list =
+  (* ignore (network : Network.t);
+     ignore (person : Person.t); *)
+
+  (* let network = Network.of_file input_file in *)
+  (* let graph = G.create () in
+    Set.iter network ~f:(fun (person1, person2) ->G.add_edge graph person1 person2); *)
+  let new_network_list = Set.to_list network in
+  let in_friendship person (friend1, friend2) =
+    if Person.equal friend1 person || Person.equal friend2 person
+    then true
+    else false
+  in
+  let visited = Hash_set.create (module Person) in
+  let rec recursive_find_friend_helper (queue : Person.t list)
+    : Person.t list
+    =
+    let out : Person.t list = [] in
+    match List.is_empty queue with
+    | true -> out
+    | false ->
+      let head = Option.value_exn (List.hd queue) in
+      let out = out @ [ head ] in
+      Hash_set.add visited head;
+      let adjacent_friends =
+        List.filter
+          ~f:(fun x -> not (Hash_set.mem visited x))
+          (List.map
+             (List.filter new_network_list ~f:(fun input_var ->
+                in_friendship head input_var))
+             ~f:(fun (x, y) -> if Person.equal x head then y else x))
+      in
+      let new_queue = Option.value_exn (List.tl queue) @ adjacent_friends in
+      let output = out @ recursive_find_friend_helper new_queue in
+      output
+  in
+  Hash_set.to_list
+    (Hash_set.of_list
+       (module String)
+       (recursive_find_friend_helper [ person ]))
 ;;
+
+(* Hash_set.to_list ( Hash_set.of_list (module Perosn) (recursive_find_friend_helper [ person ]) )
+   ;; *)
+
+(* failwith "TODO" *)
 
 let find_friend_group_command =
   let open Command.Let_syntax in
@@ -143,7 +191,8 @@ let find_friend_group_command =
       fun () ->
         let network = Network.of_file input_file in
         let friends = find_friend_group network ~person in
-        List.iter friends ~f:print_endline]
+        List.iter friends ~f:print_endline;
+        print_endline (Int.to_string (List.length friends))]
 ;;
 
 let command =
