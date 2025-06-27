@@ -14,6 +14,63 @@ open! Core
    One nice think about Wikipedia is that stringent content moderation results in
    uniformity in article format. We can expect that all Wikipedia article links parsed
    from a Wikipedia page will have the form "/wiki/<TITLE>". *)
+
+module Website = struct
+  module T = struct
+    type t =
+      { title_name : string
+      ; url_link : string
+      }
+    [@@deriving compare, sexp, hash, equal]
+  end
+
+  include T
+  module Hash_set = Hash_set.Make (T)
+end
+
+module Network = struct
+  (* We can represent our social network graph as a set of connections, where a connection
+     represents a friendship between two people. *)
+  module Connection = struct
+    module T = struct
+      type t = Website.t * Website.t [@@deriving compare, sexp]
+    end
+
+    (* This funky syntax is necessary to implement sets of [Connection.t]s. This is needed
+       to defined our [Network.t] type later. Using this [Comparable.Make] functor also
+       gives us immutable maps, which might come in handy later. *)
+    include Comparable.Make (T)
+  end
+
+  type t = Connection.Set.t [@@deriving sexp_of]
+end
+
+let no_parantheses input_string : string =
+  let first_step = String.tr input_string ~target:'(' ~replacement:'_' in
+  String.tr first_step ~target:')' ~replacement:'_'
+;;
+
+module G = Graph.Imperative.Graph.Concrete (Website)
+
+(* We extend our [Graph] structure with the [Dot] API so that we can easily render
+   constructed graphs. Documentation about this API can be found here:
+   https://github.com/backtracking/ocamlgraph/blob/master/src/dot.mli *)
+module Dot = Graph.Graphviz.Dot (struct
+    include G
+
+    (* These functions can be changed to tweak the appearance of the generated
+       graph. Check out the ocamlgraph graphviz API
+       (https://github.com/backtracking/ocamlgraph/blob/master/src/graphviz.mli) for
+       examples of what values can be set here. *)
+    let edge_attributes _ = [ `Dir `None ]
+    let default_edge_attributes _ = []
+    let get_subgraph _ = None
+    let vertex_attributes _ = [ `Shape `Box; `Fillcolor 1000 ]
+    let vertex_name (v : Website.t) = no_parantheses v.title_name
+    let default_vertex_attributes _ = []
+    let graph_attributes _ = []
+  end)
+
 let get_linked_articles contents : string list =
   (* print_s [%message "here are the contents" (contents : string)]; *)
   let open! Soup in
@@ -60,13 +117,80 @@ let print_links_command =
    [how_to_fetch] argument along with [File_fetcher] to fetch the articles so that the
    implementation can be tested locally on the small dataset in the ../resources/wiki
    directory. *)
+
+let get_title contents : string =
+  let open Soup in
+  parse contents $ "title" |> R.leaf_text
+;;
+
+let _make_website contents : Website.t =
+  let title = get_title contents in
+  let just_title =
+    String.concat
+      ~sep:"_"
+      (List.drop_last_exn (List.drop_last_exn (String.split ~on:' ' title)))
+  in
+  let url = "wiki/" ^ just_title in
+  print_string (url ^ "\n");
+  { title_name = title; url_link = url }
+;;
+
+let make_website contents : Website.t =
+  print_s [%message "" ~input:(get_title contents : string)];
+  let title =
+    get_title contents
+    |> String.substr_replace_all ~pattern:" - Wikipedia" ~with_:""
+    |> String.substr_replace_all ~pattern:" " ~with_:"_"
+  in
+  (* String.concat
+     ~sep:"_"
+     (List.drop_last_exn (List.drop_last_exn (String.split ~on:' ' title))) in *)
+  let url = "wiki/" ^ title in
+  print_string (url ^ "\n");
+  { title_name = title; url_link = url }
+;;
+
 let visualize ?(max_depth = 3) ~origin ~output_file ~how_to_fetch () : unit =
-  ignore (max_depth : int);
+  let visited = Website.Hash_set.create () in
+  let graph = G.create () in
+  (* Set.iter network ~f:(fun (person1, person2) -> G.add_edge graph person1 person2);
+     Dot.output_graph
+     (Out_channel.create (File_path.to_string output_file))
+     graph *)
+  (* let current_website : Website.t = make_website contents_of_file in *)
+  let rec recursive_visualize depth origin =
+    match depth with
+    | 0 -> ()
+    | _ ->
+      let contents_of_file =
+        File_fetcher.fetch_exn how_to_fetch ~resource:origin
+      in
+      let current_website : Website.t = make_website contents_of_file in
+      let linked_articles = get_linked_articles contents_of_file in
+      let linked_websites =
+        List.map linked_articles ~f:(fun x ->
+          make_website (File_fetcher.fetch_exn how_to_fetch ~resource:x))
+        |> List.filter ~f:(fun x -> not (Hash_set.mem visited x))
+      in
+      List.iter linked_websites ~f:(fun x ->
+        G.add_edge graph current_website x);
+      Hash_set.add visited current_website;
+      List.iter linked_websites ~f:(fun x ->
+        recursive_visualize (depth - 1) x.url_link)
+  in
+  recursive_visualize max_depth origin;
+  Dot.output_graph
+    (Out_channel.create (File_path.to_string output_file))
+    graph;
+  print_string "done";
+  ()
+;;
+
+(* ignore (max_depth : int);
   ignore (origin : string);
   ignore (output_file : File_path.t);
-  ignore (how_to_fetch : File_fetcher.How_to_fetch.t);
-  failwith "TODO"
-;;
+  ignore (how_to_fetch : File_fetcher.How_to_fetch.t); *)
+(* failwith "TODO" *)
 
 let visualize_command =
   let open Command.Let_syntax in

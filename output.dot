@@ -1,0 +1,35 @@
+digraph G {
+  Organism [fillcolor="#0003E8", shape=box, ];
+  Animal [fillcolor="#0003E8", shape=box, ];
+  Carnivora [fillcolor="#0003E8", shape=box, ];
+  Mammal [fillcolor="#0003E8", shape=box, ];
+  Order__biology_ [fillcolor="#0003E8", shape=box, ];
+  Dog [fillcolor="#0003E8", shape=box, ];
+  Feliformia [fillcolor="#0003E8", shape=box, ];
+  Taxonomy [fillcolor="#0003E8", shape=box, ];
+  Domestication_of_the_cat [fillcolor="#0003E8", shape=box, ];
+  Carnivore [fillcolor="#0003E8", shape=box, ];
+  Cat [fillcolor="#0003E8", shape=box, ];
+  Biological_classification [fillcolor="#0003E8", shape=box, ];
+  Caniformia [fillcolor="#0003E8", shape=box, ];
+  Species [fillcolor="#0003E8", shape=box, ];
+  
+  
+  Organism -> Animal [dir=none, ];
+  Carnivora -> Caniformia [dir=none, ];
+  Mammal -> Cat [dir=none, ];
+  Mammal -> Feliformia [dir=none, ];
+  Order__biology_ -> Feliformia [dir=none, ];
+  Dog -> Caniformia [dir=none, ];
+  Feliformia -> Carnivora [dir=none, ];
+  Feliformia -> Carnivore [dir=none, ];
+  Taxonomy -> Biological_classification [dir=none, ];
+  Taxonomy -> Species [dir=none, ];
+  Domestication_of_the_cat -> Cat [dir=none, ];
+  Carnivore -> Caniformia [dir=none, ];
+  Cat -> Carnivore [dir=none, ];
+  Species -> Biological_classification [dir=none, ];
+  Species -> Cat [dir=none, ];
+  Species -> Organism [dir=none, ];
+  
+  }
