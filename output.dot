@@ -17,19 +17,29 @@ digraph G {
   
   Organism -> Animal [dir=none, ];
   Carnivora -> Caniformia [dir=none, ];
+  Mammal -> Animal [dir=none, ];
+  Mammal -> Carnivora [dir=none, ];
   Mammal -> Cat [dir=none, ];
+  Mammal -> Dog [dir=none, ];
   Mammal -> Feliformia [dir=none, ];
+  Order__biology_ -> Carnivora [dir=none, ];
   Order__biology_ -> Feliformia [dir=none, ];
   Dog -> Caniformia [dir=none, ];
+  Feliformia -> Caniformia [dir=none, ];
   Feliformia -> Carnivora [dir=none, ];
   Feliformia -> Carnivore [dir=none, ];
+  Feliformia -> Cat [dir=none, ];
   Taxonomy -> Biological_classification [dir=none, ];
+  Taxonomy -> Feliformia [dir=none, ];
+  Taxonomy -> Order__biology_ [dir=none, ];
   Taxonomy -> Species [dir=none, ];
   Domestication_of_the_cat -> Cat [dir=none, ];
+  Carnivore -> Animal [dir=none, ];
   Carnivore -> Caniformia [dir=none, ];
   Cat -> Carnivore [dir=none, ];
   Species -> Biological_classification [dir=none, ];
   Species -> Cat [dir=none, ];
+  Species -> Feliformia [dir=none, ];
   Species -> Organism [dir=none, ];
   
   }

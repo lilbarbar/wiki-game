@@ -170,7 +170,7 @@ let visualize ?(max_depth = 3) ~origin ~output_file ~how_to_fetch () : unit =
       let linked_websites =
         List.map linked_articles ~f:(fun x ->
           make_website (File_fetcher.fetch_exn how_to_fetch ~resource:x))
-        |> List.filter ~f:(fun x -> not (Hash_set.mem visited x))
+        (* |> List.filter ~f:(fun x -> not (Hash_set.mem visited x)) *)
       in
       List.iter linked_websites ~f:(fun x ->
         G.add_edge graph current_website x);
